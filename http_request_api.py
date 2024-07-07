@@ -1,9 +1,8 @@
 from tkinter.font import Font
 import requests
 import tkinter as tk
-import cv2
-import numpy as np
 from PIL import Image, ImageTk
+import io
 
 root = tk.Tk()
 root.title("User Information")
@@ -17,14 +16,18 @@ url = "https://reqres.in/api/users"
 response = requests.get(url)
 user_data = response.json()["data"]
 
+
+images = []
+names = []
+emails = []
+
 for user in user_data:
     image_url = user['avatar']
     response = requests.get(image_url)
-    image_data = np.asarray(bytearray(response.content), dtype="uint8")
+    image_data = response.content
 
-    image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
-
-    image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    image = Image.open(io.BytesIO(image_data))
+    image = image.convert("RGB")
     image = ImageTk.PhotoImage(image)
     images.append(image)
 
@@ -32,6 +35,7 @@ for user in user_data:
     info_email = user['email']
     names.append(info_name)
     emails.append(info_email)
+
 
 header_label = tk.Label(text="Hello ReqRes Users!", font=my_font)
 header_label.grid(row=0, column=1, pady=10)
